@@ -81,6 +81,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        //台北101的位置
+        LatLng taipei101 = new LatLng(25.033408, 121.564099);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                taipei101, 15));
+        mMap.addMarker(new MarkerOptions()
+            .position(taipei101)
+            .title("101"));
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -142,6 +149,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         //noinspection MissingPermission
+        /*
         Location location = LocationServices.FusedLocationApi
                 .getLastLocation(mGoogleApiClient);
         if (location != null){
@@ -152,6 +160,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //noinspection MissingPermission
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, locationRequest, this);
+                */
     }
 
     @Override
