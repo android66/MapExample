@@ -11,7 +11,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -22,7 +25,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -30,6 +35,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
     LocationRequest locationRequest;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +44,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        if (mGoogleApiClient == null){
+        if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
@@ -85,10 +91,46 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng taipei101 = new LatLng(25.033408, 121.564099);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                 taipei101, 15));
-        mMap.addMarker(new MarkerOptions()
-            .position(taipei101)
-            .title("101"));
+        Marker marker = mMap.addMarker(new MarkerOptions()
+                .position(taipei101)
+                .title("101")
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.bubble2))
+                .snippet("這是台北101"));
+//        marker.showInfoWindow();
+        mMap.setInfoWindowAdapter(
+                new GoogleMap.InfoWindowAdapter() {
+                    @Override
+                    public View getInfoWindow(Marker marker) {
+                        View view = getLayoutInflater().inflate(
+                                R.layout.info_window, null);
+                        TextView title =
+                                (TextView) view.findViewById(R.id.info_title);
+                        title.setText("Title: "+marker.getTitle());
+                        TextView snippet =
+                                (TextView) view.findViewById(R.id.info_snippet);
+                        snippet.setText(marker.getTitle());
+                        return view;
+                    }
+
+                    @Override
+                    public View getInfoContents(Marker marker) {
+                        return null;
+                    }
+                }
+        );
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                new AlertDialog.Builder(MapsActivity.this)
+                        .setTitle(marker.getTitle())
+                        .setMessage(marker.getSnippet())
+                        .setPositiveButton("OK", null)
+                        .show();
+                return true;
+            }
+        });
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -121,8 +163,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         String provider = locationManager.getBestProvider(criteria, true);
                         //noinspection MissingPermission
                         Location location = locationManager.getLastKnownLocation(provider);
-                        if (location != null){
-                            Log.i("LOCATION", location.getLatitude()+"/" +
+                        if (location != null) {
+                            Log.i("LOCATION", location.getLatitude() + "/" +
                                     location.getLongitude());
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(location.getLatitude(), location.getLongitude())
@@ -175,8 +217,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-        if (location != null){
-            Log.d("LOCATION", location.getLatitude()+","+
+        if (location != null) {
+            Log.d("LOCATION", location.getLatitude() + "," +
                     location.getLongitude());
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(location.getLatitude(), location.getLongitude())
